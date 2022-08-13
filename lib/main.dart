@@ -1,115 +1,353 @@
 import 'package:flutter/material.dart';
+import './flashcard.dart';
+import './objectbox.g.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const CategoryPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class CategoryPage extends StatefulWidget {
+  const CategoryPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<CategoryPage> createState() => _CategoryPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _CategoryPageState extends State<CategoryPage> {
+  Store? store;
+  Box<FlashCard>? flashCardBox;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    initialize();
+    super.initState();
+  }
+
+  // Store と Box を用意します
+  void initialize() async {
+    store = await openStore();
+    flashCardBox = store?.box<FlashCard>();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('単語帳'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: Container(
+        padding: const EdgeInsets.all(25.0),
+        alignment: Alignment.center,
+        child: GestureDetector(
+          child: const CategoryCard(categoryName: 'Flutter'),
+          onTap: () {
+            Navigator.of(context).push<FlashCard>(
+              MaterialPageRoute(
+                builder: (context) {
+                  return FlashCardListPage(
+                      flashCardBox: flashCardBox!, title: 'Flutter');
+                },
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+class CategoryCard extends StatelessWidget {
+  final String categoryName;
+  const CategoryCard({
+    required this.categoryName,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20.0),
+        height: 150,
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+                color: Color(0x29000000),
+                offset: Offset(0, 3),
+                blurRadius: 6,
+                spreadRadius: 0),
+          ],
+        ),
+        child: Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xffffffff),
+              border: Border.all(color: const Color(0xff007aff), width: 0.5),
+            ),
+            child: Center(
+              child: Text(
+                categoryName,
+                style: const TextStyle(
+                  fontSize: 35,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FlashCardListPage extends StatefulWidget {
+  Box<FlashCard> flashCardBox;
+  final String title;
+  FlashCardListPage({required this.flashCardBox, required this.title, Key? key})
+      : super(key: key);
+
+  @override
+  State<FlashCardListPage> createState() => _FlashCardListPageState();
+}
+
+class _FlashCardListPageState extends State<FlashCardListPage> {
+  Box<FlashCard>? flashCardBox;
+  List<FlashCard> flashCards = [];
+
+  /// Box から FlashCard 一覧を取得します
+  void fetchFlashCard() {
+    flashCards = flashCardBox?.getAll() ?? [];
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    flashCardBox = widget.flashCardBox;
+    fetchFlashCard();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("単語帳"),
+      ),
+      body: Column(children: [
+        Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            color: const Color(0xff098a8c),
+            border: Border.all(color: const Color(0xff098a8c), width: 1),
+          ),
+          child: Container(
+            margin: const EdgeInsets.only(right: 10, bottom: 10),
+            child: Text(
+              '${widget.title} 用語集',
+              style: const TextStyle(
+                color: Color(0xffffffff),
+                fontSize: 27,
+                fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.normal,
+                letterSpacing: 0.0075,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        Expanded(
+          child: SizedBox(
+            width: double.infinity,
+            child: ListView.builder(
+              itemCount: flashCards.length,
+              itemBuilder: (BuildContext context, int index) {
+                final flashCard = flashCards[index];
+                return Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.black38),
+                    ),
+                  ),
+                  child: ListTile(
+                    trailing: const Icon(Icons.arrow_right_sharp),
+                    title: Row(
+                      children: [
+                        Text(
+                          flashCard.word,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        if (flashCard.star) ...{
+                          const Icon(
+                            Icons.star,
+                            color: Colors.yellow,
+                          ),
+                        } else ...{
+                          const Icon(Icons.star_outline),
+                        }
+                      ],
+                    ),
+                    onTap: () async {
+                      final updateFlashCard =
+                          await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return FlashCardDetailPage(
+                                flashCardBox: flashCardBox!, id: flashCard.id);
+                          },
+                        ),
+                      );
+                      if (updateFlashCard!) {
+                        fetchFlashCard();
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ]),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        child: const Text(
+          '追加',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        // ここで画面遷移とデータを新規追加しています
+        onPressed: () async {
+          final newFlashCard = await Navigator.of(context).push<FlashCard>(
+            MaterialPageRoute(
+              builder: (context) {
+                return const AddFlashCardPage();
+              },
+            ),
+          );
+          if (newFlashCard != null) {
+            flashCardBox?.put(newFlashCard);
+            fetchFlashCard();
+          }
+        },
+      ),
+    );
+  }
+}
+
+class AddFlashCardPage extends StatefulWidget {
+  const AddFlashCardPage({super.key});
+
+  @override
+  State<AddFlashCardPage> createState() => _AddFlashCardPageState();
+}
+
+class _AddFlashCardPageState extends State<AddFlashCardPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('用語を追加'),
+      ),
+      body: TextFormField(
+        onFieldSubmitted: (text) {
+          final flashCard = FlashCard(word: text, star: false);
+          Navigator.of(context).pop(flashCard);
+        },
+      ),
+    );
+  }
+}
+
+class FlashCardDetailPage extends StatefulWidget {
+  Box<FlashCard> flashCardBox;
+  final int id;
+  FlashCardDetailPage({required this.flashCardBox, required this.id, Key? key})
+      : super(key: key);
+
+  @override
+  State<FlashCardDetailPage> createState() => _FlashCardDetailPageState();
+}
+
+class _FlashCardDetailPageState extends State<FlashCardDetailPage> {
+  Box<FlashCard>? flashCardBox;
+  FlashCard? flashCard;
+
+  void deleteFlashCard() {
+    flashCardBox?.remove(widget.id);
+  }
+
+  @override
+  void initState() {
+    flashCardBox = widget.flashCardBox;
+    flashCard = widget.flashCardBox.get(widget.id);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+        title: const Text("単語帳"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              deleteFlashCard();
+              Navigator.of(context).pop(true);
+            },
+            icon: const Icon(Icons.delete),
+          )
+        ],
+      ),
+      body: Scaffold(
+        body: Container(
+          alignment: Alignment.center,
+          child: Text(
+            flashCard!.word,
+            style: const TextStyle(
+              fontFamily: 'SFProDisplay',
+              color: Colors.black,
+              fontSize: 40,
+              fontWeight: FontWeight.w400,
+              fontStyle: FontStyle.normal,
+              letterSpacing: 0.0075,
+            ),
+            overflow: TextOverflow.visible,
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: (flashCard!.star)
+              ? const Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                )
+              : const Icon(Icons.star_outline),
+          // ここで画面遷移とデータを新規追加しています
+          onPressed: () {
+            flashCard!.star = (flashCard!.star) ? false : true;
+            flashCardBox?.put(flashCard!);
+            setState(() {});
+          },
+        ),
+      ),
     );
   }
 }
