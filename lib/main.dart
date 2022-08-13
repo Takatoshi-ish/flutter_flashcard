@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// カテゴリーリストを表示する画面
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
 
@@ -67,6 +68,7 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 }
 
+// カテゴリーリストを表示する画面で用いるカード部分
 class CategoryCard extends StatelessWidget {
   final String categoryName;
   const CategoryCard({
@@ -113,6 +115,7 @@ class CategoryCard extends StatelessWidget {
   }
 }
 
+// 選択したカテゴリーのカードリスト画面
 class FlashCardListPage extends StatefulWidget {
   Box<FlashCard> flashCardBox;
   final String title;
@@ -249,6 +252,7 @@ class _FlashCardListPageState extends State<FlashCardListPage> {
   }
 }
 
+// カード追加画面
 class AddFlashCardPage extends StatefulWidget {
   const AddFlashCardPage({super.key});
 
@@ -273,6 +277,7 @@ class _AddFlashCardPageState extends State<AddFlashCardPage> {
   }
 }
 
+// 選択したカードの詳細画面
 class FlashCardDetailPage extends StatefulWidget {
   Box<FlashCard> flashCardBox;
   final int id;
