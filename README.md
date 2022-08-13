@@ -20,5 +20,8 @@ Flutter というカテゴリーが一つあり、そのカテゴリーの単語
 
 ### ◆上記の課題の完成図
 
-[![title](assets/result.png)](assets/movie.mp4 "タイトルなど")
+<video controls width="100%" autoplay loop muted="true" src="assets/movie.mp4" type="video/mp4" >
+ Sorry, your browser doesn't support embedded videos.
+</video>
+
 
