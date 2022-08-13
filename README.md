@@ -19,9 +19,6 @@ Flutter というカテゴリーが一つあり、そのカテゴリーの単語
 を実装しました。
 
 ### ◆上記の課題の完成図
+[![title](assets/result.png)](https://youtube.com/shorts/KGuoql9A9CM?feature=share "実行結果")
 
-<video controls width="100%" autoplay loop muted="true" src="assets/movie.mp4" type="video/mp4" >
- Sorry, your browser doesn't support embedded videos.
-</video>
-
-
+※クリックするとリンクが飛びます。
